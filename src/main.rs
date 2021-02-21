@@ -86,7 +86,7 @@ async fn check_http(
     let parsed = uri.parse()?;
     let response = client.get(parsed).await?;
     let status = response.status();
-    if ! check_status(&uri, &status, 301, verbose) {
+    if !check_status(&uri, &status, 301, verbose) {
         return Ok(false);
     }
     let headers = response.headers();
@@ -106,7 +106,7 @@ async fn check_www_http(
     let parsed = uri.parse()?;
     let response = client.get(parsed).await?;
     let status = response.status();
-    if ! check_status(&uri, &status, 301, verbose) {
+    if !check_status(&uri, &status, 301, verbose) {
         return Ok(false);
     }
     let headers = response.headers();
@@ -129,8 +129,8 @@ async fn check_www_https(
     let parsed = uri.parse()?;
     let response = client.get(parsed).await?;
     let status = response.status();
-    if ! check_status(&uri, &status, 301, verbose) {
-        return Ok(false)
+    if !check_status(&uri, &status, 301, verbose) {
+        return Ok(false);
     }
     let headers = response.headers();
     let expected_location = domain_to_https(domain, false);
@@ -150,15 +150,18 @@ async fn check_https(
     let parsed = uri.parse()?;
     let response = client.get(parsed).await?;
     let status = response.status();
-    if ! check_status(&uri, &status, 200, verbose) {
-        return Ok(false)
+    if !check_status(&uri, &status, 200, verbose) {
+        return Ok(false);
     }
     Ok(true)
 }
 
-fn check_status (uri: &str, received: &StatusCode, expected: u16, verbose: &bool) -> bool {
+fn check_status(uri: &str, received: &StatusCode, expected: u16, verbose: &bool) -> bool {
     if *received != expected {
-        eprintln!("Error:\t{} responded {}. Expected {}.", uri, received, expected);
+        eprintln!(
+            "Error:\t{} responded {}. Expected {}.",
+            uri, received, expected
+        );
         return false;
     } else if *verbose {
         println!("OK:\t{} responded {}.", uri, received);
