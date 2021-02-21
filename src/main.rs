@@ -6,6 +6,10 @@ use clap::{App, Arg};
 use hyper::{Client, HeaderMap, StatusCode};
 use hyper_tls::HttpsConnector;
 
+const DOMAIN_ARGUMENT: &'static str = "DOMAIN";
+const VERBOSE_ARGUMENT: &'static str = "verbose";
+const WWW_ARGUMENT: &'static str = "www";
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let matches = App::new(clap::crate_name!())
@@ -13,28 +17,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .author(clap::crate_authors!("\n"))
         .about(clap::crate_description!())
         .arg(
-            Arg::with_name("DOMAIN")
+            Arg::with_name(DOMAIN_ARGUMENT)
                 .help("Sets the domain to check")
                 .required(true)
                 .index(1),
         )
         .arg(
-            Arg::with_name("verbose")
+            Arg::with_name(VERBOSE_ARGUMENT)
                 .long("verbose")
                 .help("Enable verbose output"),
         )
         .arg(
-            Arg::with_name("www")
+            Arg::with_name(WWW_ARGUMENT)
                 .long("www")
                 .help("Check redirection from www to root"),
         )
         .get_matches();
 
-    let verbose = matches.is_present("verbose");
-    let www = matches.is_present("www");
+    let verbose = matches.is_present(VERBOSE_ARGUMENT);
+    let www = matches.is_present(WWW_ARGUMENT);
 
     // Calling .unwrap() is safe.  Clap will require DOMAIN.
-    let domain = matches.value_of("DOMAIN").unwrap();
+    let domain = matches.value_of(DOMAIN_ARGUMENT).unwrap();
 
     let http_ok = match check_http(domain, &verbose).await {
         Ok(result) => result,
