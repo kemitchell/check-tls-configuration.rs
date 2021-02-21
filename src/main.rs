@@ -39,14 +39,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let http_ok = match check_http(domain, &verbose).await {
         Ok(result) => result,
         Err(error) => {
-            eprintln!("Error: {}", error);
+            eprintln!("Error:\t{}", error);
             false
         }
     };
     let https_ok = match check_https(domain, &verbose).await {
         Ok(result) => result,
         Err(error) => {
-            eprintln!("Error: {}", error);
+            eprintln!("Error:\t{}", error);
             false
         }
     };
@@ -57,14 +57,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         www_http_ok = match check_www_http(domain, &verbose).await {
             Ok(result) => result,
             Err(error) => {
-                eprintln!("Error: {}", error);
+                eprintln!("Error:\t{}", error);
                 false
             }
         };
         www_https_ok = match check_www_https(domain, &verbose).await {
             Ok(result) => result,
             Err(error) => {
-                eprintln!("Error: {}", error);
+                eprintln!("Error:\t{}", error);
                 false
             }
         };
@@ -158,31 +158,31 @@ async fn check_https(
 
 fn check_status (uri: &str, received: &StatusCode, expected: u16, verbose: &bool) -> bool {
     if *received != expected {
-        eprintln!("Error: {} responded {}. Expected {}.", uri, received, expected);
+        eprintln!("Error:\t{} responded {}. Expected {}.", uri, received, expected);
         return false;
     } else if *verbose {
-        println!("OK: {} responded {}.", uri, received);
+        println!("OK:\t{} responded {}.", uri, received);
     }
     return true;
 }
 
 fn check_location_header(uri: &str, headers: &HeaderMap, expected: &str, verbose: &bool) -> bool {
     if !headers.contains_key("location") {
-        eprintln!("Error: {} responded without Location header.", uri);
+        eprintln!("Error:\t{} responded without Location header.", uri);
         return false;
     } else if *verbose {
-        println!("OK: {} responded with a Location header.", uri);
+        println!("OK:\t{} responded with a Location header.", uri);
     }
     let location = headers.get("location").unwrap().to_str().unwrap();
     if location != expected {
         eprintln!(
-            "Error: {} responded with Location header \"{}\". Expected {}.",
+            "Error:\t{} responded with Location header \"{}\". Expected {}.",
             uri, location, expected
         );
         return false;
     } else if *verbose {
         println!(
-            "OK: {} responded with Location header \"{}\".",
+            "OK:\t{} responded with Location header \"{}\".",
             uri, location
         );
     }
