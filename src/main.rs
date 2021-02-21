@@ -26,7 +26,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .arg(
             Arg::with_name("www")
                 .long("www")
-                .help("Check direction from www to root"),
+                .help("Check redirection from www to root"),
         )
         .get_matches();
 
