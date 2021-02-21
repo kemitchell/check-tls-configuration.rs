@@ -8,10 +8,10 @@ use hyper_tls::HttpsConnector;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let matches = App::new("check-tls-configuration")
-        .version("0.0.0")
-        .author("Kyle E. Mitchell <kyle@kemitchell.com>")
-        .about("checks the TLS configuration for a WWW domain")
+    let matches = App::new(clap::crate_name!())
+        .version(clap::crate_version!())
+        .author(clap::crate_authors!("\n"))
+        .about(clap::crate_description!())
         .arg(
             Arg::with_name("DOMAIN")
                 .help("Sets the domain to check")
