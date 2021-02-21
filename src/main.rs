@@ -6,9 +6,9 @@ use clap::{App, Arg};
 use hyper::{Client, HeaderMap, StatusCode};
 use hyper_tls::HttpsConnector;
 
-const DOMAIN_ARGUMENT: &'static str = "DOMAIN";
-const VERBOSE_ARGUMENT: &'static str = "verbose";
-const WWW_ARGUMENT: &'static str = "www";
+const DOMAIN_ARGUMENT: &str = "DOMAIN";
+const VERBOSE_ARGUMENT: &str = "verbose";
+const WWW_ARGUMENT: &str = "www";
 
 type BoxedError = Box<dyn std::error::Error + Send + Sync>;
 
@@ -122,7 +122,7 @@ async fn check_www_https(domain: &str, verbose: &bool) -> Result<bool, BoxedErro
     let client = Client::builder().build::<_, hyper::Body>(https);
     let mut uri = String::from("https://www.");
     uri.push_str(domain);
-    uri.push_str("/");
+    uri.push('/');
     let parsed = uri.parse()?;
     let response = client.get(parsed).await?;
     let status = response.status();
@@ -160,7 +160,7 @@ fn check_status(uri: &str, received: &StatusCode, expected: u16, verbose: &bool)
     } else if *verbose {
         println!("OK:\t{} responded {}.", uri, received);
     }
-    return true;
+    true
 }
 
 fn check_location_header(uri: &str, headers: &HeaderMap, expected: &str, verbose: &bool) -> bool {
@@ -183,7 +183,7 @@ fn check_location_header(uri: &str, headers: &HeaderMap, expected: &str, verbose
             uri, location
         );
     }
-    return true;
+    true
 }
 
 fn domain_to_http(domain: &str, www: bool) -> String {
@@ -192,7 +192,7 @@ fn domain_to_http(domain: &str, www: bool) -> String {
         returned.push_str("www.");
     }
     returned.push_str(domain);
-    returned.push_str("/");
+    returned.push('/');
     returned
 }
 
@@ -202,6 +202,6 @@ fn domain_to_https(domain: &str, www: bool) -> String {
         returned.push_str("www.");
     }
     returned.push_str(domain);
-    returned.push_str("/");
+    returned.push('/');
     returned
 }
