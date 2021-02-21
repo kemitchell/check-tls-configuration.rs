@@ -1,0 +1,11 @@
+[package]
+name = "check-tls-configuration"
+version = "0.1.0"
+authors = ["Kyle E. Mitchell <kyle@kemitchell.com>"]
+edition = "2018"
+
+[dependencies]
+clap = "2.33.3"
+hyper = { version = "0.14", features=["full"] }
+hyper-tls = "0.5.0"
+tokio = { version = "1", features = ["full"] }
