@@ -3,7 +3,7 @@ extern crate hyper;
 extern crate hyper_tls;
 
 use clap::{App, Arg};
-use hyper::Client;
+use hyper::{Client, HeaderMap, StatusCode};
 use hyper_tls::HttpsConnector;
 
 #[tokio::main]
@@ -86,32 +86,13 @@ async fn check_http(
     let parsed = uri.parse()?;
     let response = client.get(parsed).await?;
     let status = response.status();
-    if status != 301 {
-        eprintln!("Error: {} responded {}. Expected 301.", uri, status);
+    if ! check_status(&uri, &status, 301, verbose) {
         return Ok(false);
-    } else if *verbose {
-        println!("OK: {} responded {}.", uri, status);
     }
     let headers = response.headers();
-    if !headers.contains_key("location") {
-        eprintln!("Error: {} responded without Location header.", uri);
-        return Ok(false);
-    } else if *verbose {
-        println!("OK: {} responded with a Location header.", uri);
-    }
-    let location = headers.get("location").unwrap().to_str().unwrap();
     let expected_location = domain_to_https(domain, false);
-    if location != expected_location {
-        eprintln!(
-            "Error: {} responded with Location header \"{}\". Expected {}.",
-            uri, location, expected_location
-        );
+    if !check_location_header(&uri, headers, &expected_location, verbose) {
         return Ok(false);
-    } else if *verbose {
-        println!(
-            "OK: {} responded with Location header \"{}\".",
-            uri, location
-        );
     }
     Ok(true)
 }
@@ -125,34 +106,13 @@ async fn check_www_http(
     let parsed = uri.parse()?;
     let response = client.get(parsed).await?;
     let status = response.status();
-    if status != 301 {
-        eprintln!("Error: {} responded {}. Expected 301.", uri, status);
+    if ! check_status(&uri, &status, 301, verbose) {
         return Ok(false);
-    } else if *verbose {
-        println!("OK: {} responded {}.", uri, status);
     }
     let headers = response.headers();
-    if !headers.contains_key("location") {
-        eprintln!("Error: {} responded without Location header.", uri);
+    let expected_location = domain_to_https(domain, false);
+    if !check_location_header(&uri, headers, &expected_location, verbose) {
         return Ok(false);
-    } else if *verbose {
-        println!("OK: {} responded with a Location header.", uri);
-    }
-    let location = headers.get("location").unwrap().to_str().unwrap();
-    let mut expected_location = String::from("https://");
-    expected_location.push_str(domain);
-    expected_location.push_str("/");
-    if location != expected_location {
-        eprintln!(
-            "Error: {} responded with Location header \"{}\". Expected {}.",
-            uri, location, expected_location
-        );
-        return Ok(false);
-    } else if *verbose {
-        println!(
-            "OK: {} responded with Location header \"{}\".",
-            uri, location
-        );
     }
     Ok(true)
 }
@@ -169,32 +129,13 @@ async fn check_www_https(
     let parsed = uri.parse()?;
     let response = client.get(parsed).await?;
     let status = response.status();
-    if status != 301 {
-        eprintln!("Error: {} responded {}. Expected 301.", uri, status);
-        return Ok(false);
-    } else if *verbose {
-        println!("OK: {} responded {}.", uri, status);
+    if ! check_status(&uri, &status, 301, verbose) {
+        return Ok(false)
     }
     let headers = response.headers();
-    if !headers.contains_key("location") {
-        eprintln!("Error: {} responded without Location header.", uri);
-        return Ok(false);
-    } else if *verbose {
-        println!("OK: {} responded with a Location header.", uri);
-    }
-    let location = headers.get("location").unwrap().to_str().unwrap();
     let expected_location = domain_to_https(domain, false);
-    if location != expected_location {
-        eprintln!(
-            "Error: {} responded with Location header \"{}\". Expected {}.",
-            uri, location, expected_location
-        );
+    if !check_location_header(&uri, headers, &expected_location, verbose) {
         return Ok(false);
-    } else if *verbose {
-        println!(
-            "OK: {} responded with Location header \"{}\".",
-            uri, location
-        );
     }
     Ok(true)
 }
@@ -209,15 +150,43 @@ async fn check_https(
     let parsed = uri.parse()?;
     let response = client.get(parsed).await?;
     let status = response.status();
-    if status != 200 {
-        eprintln!("Error: {} responded {}. Expected 200.", uri, status);
-        Ok(false)
-    } else {
-        if *verbose {
-            println!("OK: {} responded {}.", uri, status);
-        }
-        Ok(true)
+    if ! check_status(&uri, &status, 200, verbose) {
+        return Ok(false)
     }
+    Ok(true)
+}
+
+fn check_status (uri: &str, received: &StatusCode, expected: u16, verbose: &bool) -> bool {
+    if *received != expected {
+        eprintln!("Error: {} responded {}. Expected {}.", uri, received, expected);
+        return false;
+    } else if *verbose {
+        println!("OK: {} responded {}.", uri, received);
+    }
+    return true;
+}
+
+fn check_location_header(uri: &str, headers: &HeaderMap, expected: &str, verbose: &bool) -> bool {
+    if !headers.contains_key("location") {
+        eprintln!("Error: {} responded without Location header.", uri);
+        return false;
+    } else if *verbose {
+        println!("OK: {} responded with a Location header.", uri);
+    }
+    let location = headers.get("location").unwrap().to_str().unwrap();
+    if location != expected {
+        eprintln!(
+            "Error: {} responded with Location header \"{}\". Expected {}.",
+            uri, location, expected
+        );
+        return false;
+    } else if *verbose {
+        println!(
+            "OK: {} responded with Location header \"{}\".",
+            uri, location
+        );
+    }
+    return true;
 }
 
 fn domain_to_http(domain: &str, www: bool) -> String {
