@@ -10,9 +10,11 @@ const DOMAIN_ARGUMENT: &'static str = "DOMAIN";
 const VERBOSE_ARGUMENT: &'static str = "verbose";
 const WWW_ARGUMENT: &'static str = "www";
 
+type BoxedError = Box<dyn std::error::Error + Send + Sync>;
+
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let matches = App::new(clap::crate_name!())
+async fn main() -> Result<(), BoxedError> {
+    let arguments = App::new(clap::crate_name!())
         .version(clap::crate_version!())
         .author(clap::crate_authors!("\n"))
         .about(clap::crate_description!())
@@ -34,11 +36,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         )
         .get_matches();
 
-    let verbose = matches.is_present(VERBOSE_ARGUMENT);
-    let www = matches.is_present(WWW_ARGUMENT);
+    let verbose = arguments.is_present(VERBOSE_ARGUMENT);
+    let www = arguments.is_present(WWW_ARGUMENT);
 
     // Calling .unwrap() is safe.  Clap will require DOMAIN.
-    let domain = matches.value_of(DOMAIN_ARGUMENT).unwrap();
+    let domain = arguments.value_of(DOMAIN_ARGUMENT).unwrap();
 
     let http_ok = match check_http(domain, &verbose).await {
         Ok(result) => result,
@@ -81,10 +83,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     }
 }
 
-async fn check_http(
-    domain: &str,
-    verbose: &bool,
-) -> Result<bool, Box<dyn std::error::Error + Send + Sync>> {
+async fn check_http(domain: &str, verbose: &bool) -> Result<bool, BoxedError> {
     let client = Client::new();
     let uri = domain_to_http(domain, false);
     let parsed = uri.parse()?;
@@ -101,10 +100,7 @@ async fn check_http(
     Ok(true)
 }
 
-async fn check_www_http(
-    domain: &str,
-    verbose: &bool,
-) -> Result<bool, Box<dyn std::error::Error + Send + Sync>> {
+async fn check_www_http(domain: &str, verbose: &bool) -> Result<bool, BoxedError> {
     let client = Client::new();
     let uri = domain_to_http(domain, true);
     let parsed = uri.parse()?;
@@ -121,10 +117,7 @@ async fn check_www_http(
     Ok(true)
 }
 
-async fn check_www_https(
-    domain: &str,
-    verbose: &bool,
-) -> Result<bool, Box<dyn std::error::Error + Send + Sync>> {
+async fn check_www_https(domain: &str, verbose: &bool) -> Result<bool, BoxedError> {
     let https = HttpsConnector::new();
     let client = Client::builder().build::<_, hyper::Body>(https);
     let mut uri = String::from("https://www.");
@@ -144,10 +137,7 @@ async fn check_www_https(
     Ok(true)
 }
 
-async fn check_https(
-    domain: &str,
-    verbose: &bool,
-) -> Result<bool, Box<dyn std::error::Error + Send + Sync>> {
+async fn check_https(domain: &str, verbose: &bool) -> Result<bool, BoxedError> {
     let https = HttpsConnector::new();
     let client = Client::builder().build::<_, hyper::Body>(https);
     let uri = domain_to_https(domain, false);
