@@ -3,7 +3,7 @@ name = "check-tls-configuration"
 version = "0.1.0"
 authors = ["Kyle E. Mitchell <kyle@kemitchell.com>"]
 edition = "2018"
-description = "checks the TLS configuration for a WWW domain"
+description = "checks basic redirect configuration for a WWW domain using TLS"
 
 [dependencies]
 clap = "2.33.3"
