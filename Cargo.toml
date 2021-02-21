@@ -2,6 +2,7 @@
 name = "check-tls-configuration"
 version = "0.1.0"
 authors = ["Kyle E. Mitchell <kyle@kemitchell.com>"]
+license = "BlueOak-1.0.0"
 edition = "2018"
 description = "checks basic redirect configuration for a WWW domain using TLS"
 
